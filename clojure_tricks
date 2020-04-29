@@ -1,0 +1,19 @@
+ keep in mind the usefulness of mapv, e.g.:
+ ,(mapv {true 1 false 0} [true false true])  [1 0 1]  
+
+ actually i mistook in describing the problem... i have two vectors e.g.,
+ [10, 5 , 4] [5, 2, 0]  and i want to produce a vector 
+ [3,0]  because the scores from the first vector win all three times (>) wrt the score of the second vector 
+ if i had [5 2 1] and [10 2 10]  then the scores would be [0,2] since the second vector wins twice
+ to me it seems i have to apply map more times right?
+- if you have two vectors you want to walk, you can use map.  e.g.  ,(map compare [3 2 1] [1 2 3])  (1 0 -1) 
+ ridcully_, but i have to convert that vector to a list of two elements where eachc element takes into account
+ the number of times vector 1 won  and the second element is how many times vector b won
+- you can also pair them (like a transpose) and then do your magic
+ ,(map vector [1 2] [3 2])  
+ ([1 3] [2 2]) 
+- e.g. reduce that.  or if you dont
+-  mind the intermediate map, you can use frequencies with the compare example above  
+  compare will give you 1 for a winner in the first and -1 for a winner in the second
+ ,(let [r (frequencies (map compare [4 3 2] [3 2 1]))] [(r 1 0) (r -1 0)]) something like that
+ [3 0]

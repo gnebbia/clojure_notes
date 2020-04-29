@@ -1,0 +1,201 @@
+Reference: https://clojureverse.org/t/what-is-the-easiest-way-to-use-a-3rd-party-library/4330/12
+
+didibus
+2 
+Jun '19
+I see this asked often from people used to Python and JavaScript for example. As someone used to Java, C#, and Clojure, every time I have to use Python or JS, I find the package management completely lacking, and inferior in how everything requires installing global or user local packages, and each process isn’t independent in their dependency versions. So its funny to me when the opposite is asked, but I guess its just whichever you are more familiar with. Though I do hope you come to like the independence of each Clojure package without the need to setup virtual environments.
+
+So to answer your question, yes this is totally doable in Clojure.
+
+Here’s the “easy” way. And later, I’ll make a second reply with the “simple” way.
+
+Open your ~/.clojure/deps.edn file in your favorite editor.
+Uncomment or edit if already uncommented the :deps key under ;; External dependencies
+In the :deps map, add a key/value pair for each 3rd party libs you want to have included in your Clojure REPL sessions.
+For example, I’ll add specter: https://github.com/nathanmarz/specter 3
+:deps {com.rpl/specter {:mvn/version "1.1.2"}}
+Save the changes.
+Run the command: clj -Spath
+You should see that your libs are getting Downloaded, and your classpath will be listed, showing every Jar or source paths or resource paths which will be available for your REPL and Clojure scripts by default listed.
+Downloading: com/rpl/specter/1.1.2/specter-1.1.2.pom from https://repo.clojars.org/                                                  
+Downloading: riddley/riddley/0.1.12/riddley-0.1.12.pom from https://repo.clojars.org/                                                
+Downloading: com/rpl/specter/1.1.2/specter-1.1.2.jar from https://repo.clojars.org/                                                  
+Downloading: riddley/riddley/0.1.12/riddley-0.1.12.jar from https://repo.clojars.org/                                                
+src:/home/didibus/.m2/repository/org/clojure/clojure/1.9.0/clojure-1.9.0.jar:/home/didibus/.m2/repository/com/rpl/specter/1.1.2/specter-1.1.2.jar:/home/didibus/.m2/repository/org/clojure/spec.alpha/0.1.143/spec.alpha-0.1.143.jar:/home/didibus/.m2/repository/org/clojure/core.specs.alpha/0.1.24/core.specs.alpha-0.1.24.jar:/home/didibus/.m2/repository/riddley/riddley/0.1.12/riddley-0.1.12.jar   
+Now disconnect from your internet, or go somewhere without internet.
+Run a REPL with clj
+And hold and behold, all your default libs are there!
+(require '[com.rpl.specter :refer :all])
+(transform [MAP-VALS MAP-VALS]
+              inc
+              {:a {:aa 1} :b {:ba -1 :bb 2}})
+;=> {:a {:aa 2}, :b {:ba 0, :bb 3}}
+Some things to keep in mind:
+
+Specter and the libs you specify in your user deps.edn will only be available to your user account.
+You need to start the REPL using the Clojure CLI included with the new install process from Clojure 1.9+, such as clj or clojure: https://clojure.org/guides/deps_and_cli 1. So you can’t use lein or boot, or java directly to start your REPL, or the libs you specified won’t be there.
+To “uninstall” a lib, just edit the ~/.clojure/deps.edn file again, and remove the entry for it in the :deps map.
+There’s not really a way to remove a downloaded dependency from your computer. As far as I know, right now, the Clojure clj cli has no way to selectively clear downloaded dependencies from the local maven repo, or the git cache, and no way to clear it all. Maybe manually deleting them might work.
+Unlike Python, you are forced to declare a specific version. You can’t just specify you always want the latest. Due to this, there’s also no real concept of updating a lib. To update, find if there is a latest version from the lib github or the lib’s repo like Clojars, and just edit the deps.edn file with the newer version and re-run clj -Spath.
+To “rollback”, just edit again and put back the prior version number you want to downgrade back too.
+If you have an actual project with its own deps.edn, and it declares dependencies direct or transitive on the same libs, but for different versions, then the one from the version from the project’s deps.edn will be used when starting a REPL, script or app from that project’s directory.
+That’s it!
+
+4
+
+
+
+didibus
+Jun '19
+In my previous reply, I explained the “easy” way, cause you asked for it :stuck_out_tongue:
+
+This time, I’ll explain the “simple” way.
+
+Sometimes, you want to try out things in isolation. Thus, having default dependencies that are always loaded on every Clojure REPL, script or app you start might not be desired. There’s a small chance it could cause some unforeseen issues. Say you include a lib that somehow uses a static initializer to monkeypatch some weird things, and then you’re baffled as too what the hell is happening. Other times, you want to try different versions of things, but not have to constantly edit your deps.edn back and forth as you try various versions. Other times, you want to add specific dependencies only in specific cases, like say you only want nRepl if you intend to use Cider, but other times you don’t care for it, as all you want to run is (+ 2 2) since you can’t remember basic arithmetic :stuck_out_tongue:
+
+Or maybe there’s even more reasons I can’t think of.
+
+For all these, Clojure came up with a pretty cool system that you can specify dependency sets, give them a name, and then when you start the REPL or the script or the app using the Clojure clj cli, you can give it as an argument which dependency set to include using that name.
+
+Those are called aliases.
+
+What happens is instead of having a default set of dependencies that you add to the :deps map. You instead add a bunch of aliases to the :aliases map, and then you can choose when you start a REPL which one to use (can even specify to use multiple ones all at the same time, they get unioned).
+
+So for specter, it would look like this:
+
+:aliases {:specter {:extra-deps {com.rpl/specter {:mvn/version "1.1.2"}}}}
+And you would remove it from the :deps map, so you can either just comment the whole :deps key again, or just remove the specter dependency from it.
+
+Now instead of clj -Spath, you would run: clj -Aspecter -Spath.
+
+And to start the REPL, you would run clj -Aspecter.
+
+1 Reply2
+
+
+
+jiyinyiyong
+Jun '19
+I’m using shadow-cljs and grab packages from Clojars. It feels good except for that I have to restart the watcher after adding a new package from Clojars. For packages from npm(in shadow-cljs as well) I don’t need the step “kill watch server and restart”. And JVM based ClojureScript compiler is somehow slow at starting up.
+
+1 Reply1
+
+
+
+jgomo3
+
+didibus
+Jun '19
+Thank you very much for such an amazing material.
+
+That would be my workflow for playing around with libraries for now.
+
+Of course, for developing I would use the project’s deps.edn instead.
+
+Now, for replicating the same user experience many of us are familiar with, what is lacking is just tooling. Tooling for managing the .clojure/deps.edn file.
+
+I’m imagining something like the following::
+
+$ deps list # List the things I could "require" in a REPL I launch now
+$ deps add specter # add to the default
+$ deps remove specter # remove dependency from default
+$ deps alias specter-playground create # create the alias if not there
+$ deps alias specter-playground add specter # Add specter dependency to specter-playground, and download it if needed.
+$ deps alias specter-playground enable # Add implicit -Aspecter to clj
+Anyways… just thinking loud here.
+
+Thank you again.
+
+
+
+
+didibus
+Jun '19
+Now, for replicating the same user experience many of us are familiar with, what is lacking is just tooling. Tooling for managing the .clojure/deps.edn file.
+
+Ya, this is something I’ve thought about before as well. But it would require a central repository, and unique global names. It also breaks the Clojure idiom to favour data over functions, as you move your interface to a command based one over a simple config one.
+
+That said, I think tools.deps would make for a solid foundation if someone wanted to build such a thing.
+
+A simpler variation is to just create a command based tool which edits the deps.edn file for you. But, I don’t know if that makes sense. It seems like a lot of work to build a cli for that, with a lot of edge cases, when editing the file by hand is maybe what, like 3 more seconds of work for the user over running commands.
+
+So to me it boils down to what you prefer to learn, a CLI command tool and its various commands. Or a configuration format and its various config settings.
+
+The central repository of aliases though I think could be a neat idea. But I’m never super in favour of centralizing things like that, even if I can see the appeal of being able to run a command line command to search/list for libs and add them with just their global name.
+
+On the other hand, I thought what could be neat is an alias file that people could put top level in a git repo. And then a command that takes the git repo, and automatically grabs the alias and adds it to your user deps.edn or project deps.edn. Because now, you often see people say in their readme to copy/paste some alias to get started with it and use it. But again, is that worth it? Copy/pasting into a file seems just as quick as copy/pasting into a command shell.
+
+When I think about it honestly, I see very little value for making a command line tool to help you edit the deps.edn. For complex use cases, the command line tool would always be worse and more complicated. While for simple use cases, I think they are on par once you get familiar with editing the deps.edn. The only time the command line approach would be better is for new users who are more familiar with that approach coming from say Python or JavaScript. And I’m not sure we’d be doing them a favor to abstract the deps.edn file away from them.
+
+I’m using shadow-cljs and grab packages from Clojars. It feels good except for that I have to restart the watcher after adding a new package from Clojars. For packages from npm(in shadow-cljs as well) I don’t need the step “kill watch server and restart”. And JVM based ClojureScript compiler is somehow slow at starting up
+
+My replies are entirely for Clojure, and not for ClojureScript or ClojureCLR. I’d have to see if something similar can be done with ClojureScript, but it’s possible it can’t, and that it’s not as easy or simple.
+
+By watcher, do you mean that say you don’t need to restart your REPL or your server APP to get the newly added libs? Some kind of lib hot-loading?
+
+2 Replies1
+
+
+
+jgomo3
+Jun '19
+A simpler variation is to just create a command based tool which edits the deps.edn file for you. But, I don’t know if that makes sense. It seems like a lot of work to build a cli for that, with a lot of edge cases, when editing the file by hand is maybe what, like 3 more seconds of work for the user over running commands.
+
+This is exactly what I mean when I say: " Tooling for managing the .clojure/deps.edn file.". And it makes a lot of sense, at least in the Unix world where in most cases users should not be messing around with dot files (they are hidden for a reason).
+
+So to me it boils down to what you prefer to learn, a CLI command tool and its various commands. Or a configuration format and its various config settings.
+
+Or both :wink:
+
+
+
+
+didibus
+Jun '19
+Well, if you are interested in such a tool, you should check out and get involved with and maybe contribute too: https://github.com/Lokeh/plum 6
+
+Which has somewhat that goal, and was recently started.
+
+1
+
+
+
+jiyinyiyong
+Jun '19
+do you mean that say you don’t need to restart your REPL or your server APP to get the newly added libs? Some kind of lib hot-loading?
+
+Yes. In shadow-cljs, the watch server watches on node_modules/ folder. As I installed the package, the watch server noticed it and hot reload my code. So if I was debugging a web app, found I imported a missing package, I just run npm install x and it would just work.
+
+1
+
+
+
+seancorfield
+Jun '19
+There’s a branch of tools.deps which includes an add-lib function which adds new dependencies dynamically in the REPL. See https://github.com/seancorfield/dot-clojure/blob/master/deps.edn#L106-L119 3 for example code and the dependency to include in order to be able to do that.
+
+Note that this lets you add libraries to your running JVM image but does not update your deps.edn file.
+
+1
+
+
+
+didibus
+Jun '19
+Why is it still on a seperate branch? Any known issues?
+
+1
+
+
+
+seancorfield
+Jun '19
+Based on what Alex has said about it, there’s been no decision yet on whether it will end up included in tools.deps or whether it might even end up in Clojure itself at some future date.
+
+1
+
+
+
+didibus
+Jun '19
+Hum, would be cool to have it in Clojure itself. But I also know a lot of weird Javaness make it very hard to have reliable runtime dependency injection. So I can see the hesitation.
