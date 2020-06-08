@@ -137,4 +137,3 @@ We can also access it directly using the keyword:
 
 ## Remove elements from a set
 (disj #{:rabbit :door} :door) ;; -> #{:rabbit}
-
