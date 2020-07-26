@@ -1,5 +1,3 @@
-
-
 Ideally you don't want to tie up a thread waiting for the result of each http request, so pmap or other thread-based approaches aren't really a good idea.
 
 What you really want to do is:
