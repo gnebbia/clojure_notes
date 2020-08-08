@@ -1,4 +1,4 @@
-# Namespaces
+# Clojure: Namespaces
 Namespaces are used to keep things organized.
 
 Clojure libs are made up of names and symbols associated with namespaces.
@@ -13,7 +13,7 @@ Clojure libs are made up of names and symbols associated with namespaces.
 ;; whatever we def will be within this new namespace
 
 
-
+# Include an external library/module
 We can include libs inside our namespace using three ways:
 - using require and passing the lib name;
     (require 'clojure.set) ;; actually this specific library gets
@@ -33,4 +33,3 @@ it nested within the ns, with a keyword and vector:
 (ns wonderland
     (:require [food.favfoods :as ff]))
 ff/fav-food
-

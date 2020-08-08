@@ -1,4 +1,4 @@
-# Collections
+# Clojure: Collections
 All collections are immutable and persistent.
 - Immutable = value does not change;
 - Persistent = means that these collections will do smart
@@ -11,17 +11,27 @@ Common collections are:
 - maps
 - sets
 
+Difference between collections:
+- Lists are for collections of data that you want to access from the
+  top of the list.
+- Vectors are for collections of data that you want to
+  access anywhere by position.
+- Maps are for key-value pairs, which is great for organizing data and
+  having easy access.
+- Sets are for collections of unique elements; by grouping elements
+  together in a set, you can perform set operations on them.
+
 
 ## Lists vs Vectors
 
-Lists are fine when you just want to get an element off the top of the list. But what if you
-have a collection of things and you want to get the element that is right in the middle? In
-other words, what if you need index access? This is when you need a vector.
+Lists are fine when you just want to get an element off the top of the
+list. But what if you have a collection of things and you want to get
+the element that is right in the middle? In other words, what if you
+need index access? This is when you need a vector.
 
-Although you can use nth and last on lists as well as vectors, you will get better index
-access performance with vectors. This is because a list needs to start at the beginning to
-find its way to the element it wants
-
+Although you can use nth and last on lists as well as vectors, you will
+get better index access performance with vectors. This is because a list
+needs to start at the beginning to find its way to the element it wants.
 
 # List
 '(1 2 "jam" :soccer)
@@ -45,14 +55,70 @@ Most common methods on list are:
 ## Create a vector
 [1 2 3 :jam "hello"]
 (conj [:toast :bread] :jam)
+(vector 1 2 3 4)
 
 
 Most common methods on vectors are:
 - first
 - rest
 - last
-- nth
-- count
+- nth (get the nth element) or error if not present
+- get (get the nth element) or nil if not present
+- count (count elements of a vector)
+- contains? (says if the index is present in the vector) (RE-READ this is confusing)
+- vec (transforms a collection into a vector)
+
+## Convert to vector
+
+(vec (list 1 2 3 4))  ;; => [ 1 2 3 4 ]
+(vec {:a 1 :b 1})  ;; => [[:a 1] [:b 2]]
+
+
+### get
+(def v [:a :b :c :d :e :f :g])
+
+(get v 3)    ;; => :e
+(get v 1000) ;; => nil
+(get v -1)   ;; => nil
+
+### nth
+(def v [:a :b :c :d :e :f :g])
+
+(nth v 3)    ;; => :e
+(nth v -1)   ;; error
+
+### Equality checks
+
+Equality works as expected, we can also compare a vector
+with other collections.
+
+(= [1 2 3 4] (list 1 2 3 4))  ;; => true
+
+(= [1 2 3 4] [1 2 3 (* 2 2)]) ;; => true
+
+
+### Getting subvectors
+(def v [:a :b :c :d :e :f :g])
+
+(subvec v 0 3)  ;; => [:a :b :c]
+
+### Using vectors as stacks
+(def v [1 2 3 4 5])
+(conj v 6) ;; => [1 2 3 4 5 6]
+(pop v)    ;; => [1 2 3 4]
+(peek v)   ;; => 5
+
+
+### Using vectors as functions
+
+([:a :b :c :d] 0) ;; => :a
+;; this is equivalent to nth
+;; this is very useful in map functions
+;; instead of doing this:
+(map #(nth v %) [1 2 3 4 5])
+;; we can just do this
+(map v [1 2 3 4 5])
+
 
 ## Conj and Cons
 You can think of conj as being an "insert somewhere" operation, and cons
@@ -72,13 +138,12 @@ Maps are the classical key-value data structure.
 {:jam1 "strawberry" :jam2 "blackberry"}
 
 ## Get value from map
-(get {:jam1 "strawberry" :jam2 "blackberry"} :jam2)
+(get {:jam1 "strawberry" :jam2 "blackberry"} :jam2) => "blackberry"
 ;; or
 (:jam2 {:jam1 "strawberry" :jam2 "blackberry"})
 
-
 ## Get value from map or return default value
-(get {:jam1 "strawberry" :jam2 "blackberry"} :jam3 "not found")
+(get {:jam1 "strawberry" :jam2 "blackberry"} :jam3 "not found") => "not found"
 
 ## Get all keys of a map
 (keys {:jam1 "strawberry" :jam2 "blueberry"})
@@ -101,7 +166,7 @@ Maps are the classical key-value data structure.
 # Sets
 
 ## Create a set
-\#{:red :blue :black :grey}
+#{:red :blue :black :grey}
 
 ## Operations on set
 (clojure.set/union #{:r :b :w} #{:w :p :y})

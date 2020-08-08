@@ -21,6 +21,7 @@
 
 ## Links
 
+[Resources](https://purelyfunctional.tv/mini-guide/the-ultimate-guide-to-learning-clojure-for-free/)
 [Clojure Cheatsheets](https://clojure.org/api/cheatsheet)
 [Clojure Libraries](https://www.clojure-toolbox.com/)
 [Clojure Repo](https://clojars.org/)

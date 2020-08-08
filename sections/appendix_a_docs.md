@@ -1,4 +1,4 @@
-# Documentation
+# Clojure: Documentation
 
 # Get an overview of basic help/doc functionalities
 (help)
