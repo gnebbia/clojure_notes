@@ -17,3 +17,10 @@
   compare will give you 1 for a winner in the first and -1 for a winner in the second
  ,(let [r (frequencies (map compare [4 3 2] [3 2 1]))] [(r 1 0) (r -1 0)]) something like that
  [3 0]
+
+
+- traverse a complex data structure with:
+    (-> :a
+        (nth 3)
+        :b)
+    ;; and so on ...

@@ -1,8 +1,5 @@
 Reference: https://clojureverse.org/t/what-is-the-easiest-way-to-use-a-3rd-party-library/4330/12
 
-didibus
-2 
-Jun '19
 I see this asked often from people used to Python and JavaScript for example. As someone used to Java, C#, and Clojure, every time I have to use Python or JS, I find the package management completely lacking, and inferior in how everything requires installing global or user local packages, and each process isn’t independent in their dependency versions. So its funny to me when the opposite is asked, but I guess its just whichever you are more familiar with. Though I do hope you come to like the independence of each Clojure package without the need to setup virtual environments.
 
 So to answer your question, yes this is totally doable in Clojure.
@@ -105,8 +102,6 @@ $ deps alias specter-playground enable # Add implicit -Aspecter to clj
 Anyways… just thinking loud here.
 
 Thank you again.
-
-
 
 
 didibus
